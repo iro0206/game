@@ -1,1 +1,151 @@
-テスト1
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>よけゲーム</title>
+<style>
+body{
+    margin:0;
+    background:#111;
+    overflow:hidden;
+    font-family:sans-serif;
+}
+
+#game{
+    position:relative;
+    width:400px;
+    height:600px;
+    margin:20px auto;
+    background:#222;
+    border:3px solid white;
+}
+
+#player{
+    position:absolute;
+    width:40px;
+    height:40px;
+    background:deepskyblue;
+    bottom:10px;
+    left:180px;
+}
+
+.enemy{
+    position:absolute;
+    width:30px;
+    height:30px;
+    background:red;
+}
+
+#score{
+    text-align:center;
+    color:white;
+    font-size:20px;
+}
+
+#gameover{
+    position:absolute;
+    top:40%;
+    width:100%;
+    text-align:center;
+    color:white;
+    font-size:30px;
+    display:none;
+}
+</style>
+</head>
+
+<body>
+
+<div id="score">Score: 0</div>
+
+<div id="game">
+    <div id="player"></div>
+    <div id="gameover">GAME OVER<br>F5でリスタート</div>
+</div>
+
+<script>
+const game = document.getElementById("game");
+const player = document.getElementById("player");
+const scoreDisplay = document.getElementById("score");
+const gameoverText = document.getElementById("gameover");
+
+let playerX = 180;
+let enemies = [];
+let score = 0;
+let gameOver = false;
+
+document.addEventListener("keydown", e=>{
+    if(gameOver) return;
+
+    if(e.key === "ArrowLeft"){
+        playerX -= 20;
+    }
+    if(e.key === "ArrowRight"){
+        playerX += 20;
+    }
+
+    playerX = Math.max(0, Math.min(360, playerX));
+    player.style.left = playerX + "px";
+});
+
+function spawnEnemy(){
+    const enemy = document.createElement("div");
+    enemy.className = "enemy";
+
+    const x = Math.random()*370;
+
+    enemy.style.left = x+"px";
+    enemy.style.top = "-30px";
+
+    game.appendChild(enemy);
+
+    enemies.push(enemy);
+}
+
+function update(){
+
+    if(gameOver) return;
+
+    score++;
+    scoreDisplay.textContent = "Score: " + score;
+
+    if(Math.random() < 0.03){
+        spawnEnemy();
+    }
+
+    enemies.forEach((enemy,index)=>{
+        let y = parseFloat(enemy.style.top);
+        y += 4;
+        enemy.style.top = y + "px";
+
+        const ex = enemy.offsetLeft;
+        const ey = enemy.offsetTop;
+
+        const px = player.offsetLeft;
+        const py = player.offsetTop;
+
+        if(
+            ex < px + 40 &&
+            ex + 30 > px &&
+            ey < py + 40 &&
+            ey + 30 > py
+        ){
+            gameOver = true;
+            gameoverText.style.display = "block";
+        }
+
+        if(y > 600){
+            enemy.remove();
+            enemies.splice(index,1);
+        }
+
+    });
+
+    requestAnimationFrame(update);
+}
+
+update();
+</script>
+
+</body>
+</html>
